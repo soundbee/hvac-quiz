@@ -1,0 +1,55 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"/>
+  <meta name="theme-color" content="#102b46"/>
+  <title>공기조화설비 | 신입사원 실시간 퀴즈</title>
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body data-role="student">
+  <div class="app-shell">
+    <header class="topbar"><span class="brandmark">HV<span>AC</span></span><span class="toplabel">신입사원 참여형 교육</span><a class="tiny-link" href="teacher.html">교수자</a></header>
+    <main class="main student-layout">
+      <section id="studentJoin" class="panel join-panel">
+        <div class="eyebrow">LIVE CLASSROOM</div>
+        <h1>공기조화설비<br><em>핵심 퀴즈</em></h1>
+        <p class="muted">교수자가 안내한 수업코드를 입력하세요. 휴대전화로 바로 참여할 수 있습니다.</p>
+        <form id="joinForm" class="stack-form">
+          <label>수업코드<input id="joinCode" required inputmode="numeric" pattern="[0-9]{6}" maxlength="6" placeholder="6자리 수업코드" autocomplete="off" /></label>
+          <label>교육번호 또는 이름<input id="joinName" required maxlength="25" placeholder="예: 017 또는 홍길동" autocomplete="off"/></label>
+          <button class="btn primary large" type="submit" id="joinBtn">수업 입장</button>
+        </form>
+        <p class="fineprint">실제 필기평가가 아닌 수업 중 학습 확인용 퀴즈입니다.</p>
+      </section>
+      <section id="studentLobby" class="panel hidden">
+        <div class="eyebrow">WAITING ROOM</div><h2>입장 완료</h2>
+        <div class="info-grid"><div><small>수업코드</small><strong id="lobbyCode">—</strong></div><div><small>참여자</small><strong id="lobbyName">—</strong></div></div>
+        <div id="readyState" class="waiting-state">준비가 되면 버튼을 눌러주세요.</div>
+        <button class="btn primary large" id="readyBtn">준비완료</button>
+        <p class="muted smaller">교수자가 퀴즈를 시작하면 화면이 자동으로 전환됩니다.</p>
+      </section>
+      <section id="studentQuiz" class="panel quiz-panel hidden">
+        <div class="question-topline"><span id="studentQnum" class="number-pill">Q 01 / 10</span><span id="studentClock" class="clock">15.0초</span></div>
+        <div class="timer-track"><div id="studentTimerBar" class="timer-fill"></div></div>
+        <div id="studentQbox" class="source-box hidden"></div>
+        <h2 id="studentQtitle" class="question-heading">문제를 불러오는 중…</h2>
+        <div id="studentOptions" class="option-list"></div>
+        <div id="studentSubmission" class="feedback-line" aria-live="polite">선택 후에도 15초 안에는 다시 바꿀 수 있습니다.</div>
+      </section>
+      <section id="studentDone" class="panel hidden">
+        <div class="big-icon">✓</div><h2>응답이 종료되었습니다</h2>
+        <p class="muted">교수자가 정답과 최종 순위를 공개할 때까지 기다려 주세요.</p>
+      </section>
+      <section id="studentResult" class="panel hidden">
+        <div class="eyebrow">FINAL RESULTS</div><h2>퀴즈 결과</h2>
+        <div id="studentMyScore" class="score-card"></div>
+        <h3>오늘의 우수 교육생</h3><div id="studentWinners" class="winners"></div>
+        <h3>정답 및 핵심 해설</h3><div id="studentReview" class="review-list"></div>
+      </section>
+      <div id="studentError" class="status-message hidden" role="alert"></div>
+    </main>
+    <footer class="app-footer">신입사원 교육 · 참여형 학습 도구</footer>
+  </div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>

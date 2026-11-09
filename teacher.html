@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="ko">
+<head>
+ <meta charset="utf-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+ <meta name="theme-color" content="#102b46"/>
+ <title>교수자 콘솔 | 공기조화설비 실시간 퀴즈</title>
+ <link rel="stylesheet" href="styles.css"/>
+</head>
+<body data-role="teacher">
+  <div class="app-shell">
+   <header class="topbar"><span class="brandmark">HV<span>AC</span></span><span class="toplabel">교수자 운영 콘솔</span><a class="tiny-link" href="index.html">교육생 화면</a></header>
+   <main class="main teacher-layout">
+    <div class="page-header"><div><div class="eyebrow">INSTRUCTOR DASHBOARD</div><h1>실시간 퀴즈 <em>운영판</em></h1><p class="muted">15초 자동 전환 · 답안 재선택 · 첫 선택 정답 우선 순위 · 강의실 동기화</p></div><button class="btn subtle hidden" id="logoutBtn">로그아웃</button></div>
+    <section id="teacherLogin" class="panel login-panel">
+     <h2>교수자 로그인</h2>
+     <form id="loginForm" class="stack-form">
+      <label>Firebase 교수자 이메일<input id="teacherEmail" type="email" required autocomplete="username" placeholder="email@example.com"/></label>
+      <label>비밀번호<input id="teacherPassword" type="password" required autocomplete="current-password" placeholder="Firebase 인증 비밀번호"/></label>
+      <button type="submit" id="loginBtn" class="btn primary">로그인</button>
+     </form><p class="fineprint">Firebase Authentication에 등록된 교수자 계정만 이용할 수 있습니다.</p>
+    </section>
+    <div id="teacherApp" class="hidden dashboard-grid">
+      <section class="panel create-panel">
+       <div class="section-head"><h2>수업 만들기</h2><span class="chip">문항 10개 · 15초</span></div>
+       <p class="muted smaller">교수자용 엑셀(.xlsx) 또는 정답 포함 JSON을 선택하세요. 원본 파일 자체는 서버에 업로드되지 않으며, 문항과 정답은 분리 저장됩니다.</p>
+       <label class="file-drop">문항 파일 선택<input id="quizFile" type="file" accept=".xlsx,.json,application/json,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"/></label>
+       <div id="fileSummary" class="file-status">파일을 선택하지 않았습니다.</div>
+       <button id="createRoomBtn" class="btn primary" disabled>새 수업코드 만들기</button>
+       <div class="or-divider">또는 기존 수업으로 돌아가기</div>
+       <div class="inline-form"><input id="openCode" maxlength="6" inputmode="numeric" placeholder="기존 6자리 코드"/><button id="openRoomBtn" class="btn secondary">열기</button></div>
+       <div class="uid-box"><span>현재 교수자 UID</span><code id="teacherUid">—</code><button class="btn text-btn" id="copyUidBtn">복사</button></div>
+      </section>
+      <section id="teacherRoom" class="panel room-panel hidden">
+       <div class="section-head"><h2>수업 현황</h2><span id="teacherPhase" class="chip green">대기 중</span></div>
+       <div class="code-box"><div><small>수업코드</small><strong id="teacherCode">—</strong></div><div><small>교육생 접속 주소</small><a id="studentLink" href="#" target="_blank" rel="noopener" class="url-link">—</a></div></div>
+       <div class="qr-row"><div id="qrArea" class="qr-placeholder">QR 코드</div><div class="qr-actions"><button id="copyLinkBtn" class="btn secondary">교육생 링크 복사</button><p class="fineprint">QR이 표시되지 않으면 위 링크를 공유하세요.</p></div></div>
+       <div class="display-tools"><a id="displayLink" class="btn secondary" href="display.html" target="_blank" rel="noopener">강의실 화면 열기 ↗</a><p class="fineprint">빔프로젝터에는 이 전용 화면을 띄우세요. <strong>정답이 표시되는 교수자 운영판을 그대로 투사하지 마세요.</strong> 휴대폰과 같은 15초 타이머로 자동 전환됩니다.</p></div>
+       <div class="ready-summary"><div><small>준비완료</small><strong id="readyCount">0 / 0</strong></div><div><small>온라인</small><strong id="onlineCount">0명</strong></div></div>
+       <div class="progress-track"><div id="readyProgress" class="progress-fill"></div></div>
+       <div class="roster-head"><h3>교육생 준비 현황</h3><span id="rosterTotal" class="muted smaller"></span></div>
+       <div id="roster" class="roster empty-state">아직 입장한 교육생이 없습니다.</div>
+       <div class="teacher-controls">
+        <button id="startBtn" class="btn primary large">모든 준비 확인 후 퀴즈 시작</button>
+        <button id="finishBtn" class="btn secondary hidden">퀴즈 조기 종료</button>
+        <button id="revealBtn" class="btn primary hidden">정답 및 우수자 2명 공개</button>
+        <button id="exportBtn" class="btn secondary hidden">전체 성적 CSV 저장</button>
+        <button id="deleteRoomBtn" class="btn danger subtle">수업 기록 삭제</button>
+       </div>
+      </section>
+      <section id="teacherProgress" class="panel progress-panel hidden">
+       <div class="section-head"><h2>진행 중인 문항</h2><span class="chip" id="teacherProgressChip">Q 1/10</span></div>
+       <div class="question-topline"><div id="teacherQnum" class="number-pill">Q 01 / 10</div><div id="teacherClock" class="clock">15.0초</div></div>
+       <div class="timer-track"><div class="timer-fill" id="teacherTimerBar"></div></div>
+       <div class="source-box hidden" id="teacherQbox"></div>
+       <h3 id="teacherQtitle" class="question-heading">퀴즈 시작 대기 중</h3>
+       <div class="teacher-answer-meta"><div><small>해당 문항 제출</small><strong id="submittedCount">0 / 0</strong></div><div><small>정답 (교수자만 표시)</small><strong id="teacherAnswer">—</strong></div></div>
+       <div id="teacherQoptions" class="mini-options"></div>
+      </section>
+      <section id="teacherResult" class="panel results-panel hidden">
+       <div class="section-head"><h2>성적 및 정답 발표</h2><span class="chip green">공개 완료</span></div>
+       <div id="teacherWinners" class="winners"></div>
+       <div class="roster-head"><h3>전체 순위 (교수자 전용)</h3></div>
+       <div id="teacherLeaderboard" class="leaderboard"></div>
+      </section>
+     </div>
+     <div id="teacherError" class="status-message hidden" role="alert"></div>
+   </main>
+   <footer class="app-footer">본 서비스는 형성평가용입니다. 공식 시험 성적으로 사용하기 전에 추가 보안·검증이 필요합니다.</footer>
+  </div>
+  <script type="module" src="main.js"></script>
+</body>
+</html>
