@@ -57,7 +57,11 @@ let app, db, auth, offsetMs=0;
 if(!isConfigured())report('Firebase 설정이 아직 입력되지 않았습니다. site/firebase-config.js에 자신의 Firebase 웹 앱 설정을 넣어주세요.');
 else {
   try {
-    app=initializeApp(firebaseConfig);db=getDatabase(app);auth=getAuth(app);
+    // 학생용 Firebase 앱을 별도 이름으로 초기화합니다.
+    // Firebase Auth의 브라우저 로그인 상태는 앱 이름별로 분리되므로,
+    // 같은 Chrome의 다른 탭에서 학생이 익명 로그인해도 교수자 로그인이 유지됩니다.
+    app=isTeacher ? initializeApp(firebaseConfig) : initializeApp(firebaseConfig, 'hvac-quiz-student-v2-1');
+    db=getDatabase(app);auth=getAuth(app);
     onValue(ref(db,'.info/serverTimeOffset'),s=>{offsetMs=Number(s.val())||0;});
     if(isTeacher)initTeacher();else initStudent();
   } catch(err){report('Firebase 시작 오류: '+userFacingError(err));}
@@ -148,6 +152,8 @@ function initStudent(){
       const code=$('joinCode').value.trim(),name=$('joinName').value.trim();
       if(!/^\d{6}$/.test(code))throw new Error('수업코드 6자리를 입력하세요.');
       if(!name)throw new Error('교육번호 또는 이름을 입력하세요.');
+      // 로그인 정보 복원이 끝난 뒤 확인해야 새로고침/재접속 시 익명 UID가 유지됩니다.
+      await auth.authStateReady();
       let user=auth.currentUser;
       if(!user||!user.isAnonymous)user=(await signInAnonymously(auth)).user;
       uid=user.uid;
@@ -295,9 +301,16 @@ function initTeacher(){
     catch(err){report(userFacingError(err),'teacher');}finally{$('loginBtn').disabled=false;}
   });
   onAuthStateChanged(auth,user=>{
-    instructor=user && !user.isAnonymous?user:null;
+    const nextInstructor=user && !user.isAnonymous ? user : null;
+    // 실제 로그아웃/계정 변경 시에만 이전 수업 구독을 정리합니다.
+    // 익명 학생 인증은 별도 Firebase 앱에 있어 이 콜백에 영향을 주지 않습니다.
+    if(instructor && instructor.uid !== nextInstructor?.uid){
+      unbind();
+      show('teacherRoom',false);show('teacherProgress',false);show('teacherResult',false);
+    }
+    instructor=nextInstructor;
     show('teacherLogin',!instructor);show('teacherApp',Boolean(instructor));show('logoutBtn',Boolean(instructor));
-    if(instructor){txt('teacherUid',instructor.uid);}
+    if(instructor){txt('teacherUid',instructor.uid);clearError('teacher');}
   });
   $('logoutBtn').addEventListener('click',async()=>{unbind();await signOut(auth);show('teacherRoom',false);show('teacherProgress',false);show('teacherResult',false);});
   $('copyUidBtn').addEventListener('click',async()=>{if(instructor)alert(await copy(instructor.uid)?'UID를 복사했습니다.':'UID를 길게 눌러 복사하세요.');});

@@ -40,7 +40,7 @@ function tick(){if(!room)return;
 async function connect(e){e?.preventDefault();const value=$('roomCode').value.trim();if(!/^\d{6}$/.test(value)){error('6자리 수업코드를 입력하세요.');return;}
  clearError();try{
  if(!firebaseConfig.apiKey||String(firebaseConfig.apiKey).includes('PASTE_')||!firebaseConfig.databaseURL)throw new Error('firebase-config.js 설정이 필요합니다.');
- if(!db){const app=initializeApp(firebaseConfig);db=getDatabase(app);auth=getAuth(app);await auth.authStateReady();if(!auth.currentUser)await signInAnonymously(auth);
+ if(!db){const app=initializeApp(firebaseConfig, 'hvac-quiz-display-v2-1');db=getDatabase(app);auth=getAuth(app);await auth.authStateReady();if(!auth.currentUser)await signInAnonymously(auth);
  onValue(ref(db,'.info/serverTimeOffset'),s=>{offsetMs=Number(s.val())||0;});}
  else if(!auth.currentUser)await signInAnonymously(auth);
  const snapshot=await get(ref(db,`sessions/${value}/public`));if(!snapshot.exists())throw new Error('수업코드를 찾지 못했습니다.');
